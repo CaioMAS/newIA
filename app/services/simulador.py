@@ -1,5 +1,5 @@
-import pandas as pd # type: ignore
-import joblib # type: ignore
+import pandas as pd
+import joblib
 from datetime import datetime
 import os
 
@@ -8,7 +8,7 @@ from app.services.treinamento import treinar_modelo
 
 def simular_operacao():
     try:
-        # 🔎 Verifica se o modelo existe, senão treina
+        # Treina o modelo caso não exista ainda
         if not os.path.exists("modelo_trading.joblib"):
             print("⚠️ Modelo não encontrado. Treinando automaticamente...")
             treinar_modelo()
@@ -16,7 +16,6 @@ def simular_operacao():
         modelo = joblib.load("modelo_trading.joblib")
         df = pd.read_csv("dados_trading.csv")
 
-        # Garante que há dados suficientes
         if len(df) < 6:
             print("⚠️ Dados insuficientes para simular operação.")
             return
@@ -28,17 +27,16 @@ def simular_operacao():
         pred = modelo.predict(X)[0]
 
         if pred == 1:
-            preco_entrada = entrada.get("ema20", 0)
-            preco_saida = ultima.get("ema20", 0)
+            preco_entrada = entrada.get("ema20")
+            preco_saida = ultima.get("ema20")
 
-            # Verificação robusta dos valores
-            if pd.isna(preco_entrada) or pd.isna(preco_saida) or preco_entrada == 0.0 or preco_saida == 0.0:
+            # Verificação robusta de preços inválidos
+            if not preco_entrada or not preco_saida or preco_entrada == 0.0 or preco_saida == 0.0 or pd.isna(preco_entrada) or pd.isna(preco_saida):
                 print("⚠️ Preços inválidos detectados. Operação descartada.")
                 return
 
             preco_entrada = float(preco_entrada)
             preco_saida = float(preco_saida)
-
             lucro = (preco_saida / preco_entrada - 1) * 100
             resultado = "lucro" if lucro > 0 else "prejuízo" if lucro < 0 else "neutro"
 

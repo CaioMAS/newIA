@@ -1,0 +1,10 @@
+# Ignorar o ambiente virtual
+venv/
+
+# Ignorar arquivos grandes e gerados localmente
+*.csv
+*.db
+*.joblib
+__pycache__/
+*.pyc
+
